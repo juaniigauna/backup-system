@@ -17,8 +17,8 @@ class DataBase {
     }
     public function getTables() {
         $tables = array();
-        $listTables = $this->connection->query("SHOW TABLES");
-        while ($table = mysqli_fetch_array($listTables)) {
+        $tableList = $this->connection->query("SHOW TABLES");
+        while ($table = mysqli_fetch_array($tableList)) {
             $tables[] = $table[0];
         }
         return $tables;
@@ -29,16 +29,25 @@ class DataBase {
         foreach ($rowList as $row) {
             $rows[] = $row;
         }
-        return [
-            "tableName" => $tableName,
-            "rows" => $rows
-        ];
+        return $rows;
+    }
+    public function getTableStructure($tableName) {
+        $fields = array();
+        $fieldList = $this->connection->query("SHOW COLUMNS FROM $tableName");
+        foreach ($fieldList as $field) {
+            $fields[] = $field;
+        }
+        return $fields;
     }
     public function getCollection() {
         $tables = $this->getTables();
         $collection = array();
-        foreach ($tables as $table) {
-            $collection[] = $this->getRowsFromTable($table);
+        foreach ($tables as $tableName) {
+            $collection[] = [
+                "tableName" => $tableName,
+                "structure" => $this->getTableStructure($tableName),
+                "rows" => $this->getRowsFromTable($tableName)
+            ];
         }
         return $collection;
     }

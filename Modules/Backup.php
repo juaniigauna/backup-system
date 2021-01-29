@@ -7,7 +7,7 @@ class Backup {
         $this->data = $data;
     }
     public function convertDataToJson() {
-        $json = json_encode($this->data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        $json = json_encode($this->data, JSON_UNESCAPED_UNICODE);
         return $json;
     }
     public function file() {

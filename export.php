@@ -1,5 +1,5 @@
 <?php
-include "autoload.php";
+require_once "autoload.php";
 use Modules\DataBase;
 use Modules\Backup;
 
