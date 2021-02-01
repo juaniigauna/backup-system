@@ -3,7 +3,7 @@ namespace Modules;
 
 class DataBase {
     private string $host, $user, $password, $dbName;
-    private $connection;
+    public $connection;
     public function __construct(string $host = '', $user = '', $password = '', $dbName = '') {
         $this->host = $host;
         $this->user = $user;
@@ -23,7 +23,7 @@ class DataBase {
         }
         return $tables;
     }
-    public function getRowsFromTable($tableName) {
+    public function getTableRows($tableName) {
         $rows = array();
         $rowList = $this->connection->query("SELECT * FROM $tableName");
         foreach ($rowList as $row) {
@@ -46,7 +46,7 @@ class DataBase {
             $collection[] = [
                 "tableName" => $tableName,
                 "structure" => $this->getTableStructure($tableName),
-                "rows" => $this->getRowsFromTable($tableName)
+                "rows" => $this->getTableRows($tableName)
             ];
         }
         return $collection;

@@ -8,10 +8,11 @@ if ($_POST) {
     $collection = $connection->getCollection();
     $backup = new Backup($collection);
     $export = $backup->export();
-    if ($export) {
-        $url = $export['path'];
-        echo "Backup completed: <a href='$url' download>Download</a> or <a href='$url' target='_blank'>View</a>";
-    } else {
-        echo "Has been occurred an error while backup database.";
-    }
+    $backup->import($export['path']);
+    // if ($export) {
+    //     $url = $export['path'];
+    //     echo "Backup completed: <a href='$url' download>Download</a> or <a href='view.php?json=$url' target='_blank'>View</a>";
+    // } else {
+    //     echo "Has been occurred an error while backup database.";
+    // }
 }
