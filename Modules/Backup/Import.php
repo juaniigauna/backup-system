@@ -3,7 +3,8 @@ namespace Modules\Backup;
 
 class Import {
     public string $filePath;
-    public array $nullArray = [
+    public array $data,
+    $nullArray = [
         "NO" => "NOT NULL",
         "YES" => "NULL"
     ],
@@ -19,13 +20,14 @@ class Import {
     ];
     public function __construct(string $filePath) {
         $this->filePath = $filePath;
+        $this->data = $this->readFile();
     }
     public function readFile() {
         ob_start();
         include $this->filePath;
         $file = ob_get_contents();
         ob_end_clean();
-        return $file;
+        return json_decode($file);
     }
     public function validateColumnStructure($columnStructure) {
         $fieldList = array();
@@ -54,18 +56,43 @@ class Import {
         }
         return $columns;
     }
-    public function getTables(array $fileBackup) {
+
+    public function getTables() {
         $tables = array();
-        foreach ($fileBackup as $table) {
+        foreach ($this->data as $table) {
             $tableName = $table->tableName;
             $columns = $this->getColumns($table->structure);
-            $tables[] = "CREATE TABLE IF NOT EXISTS ".$tableName."(".implode(', ', $columns).") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4;";
+            $tables[] = "CREATE TABLE IF NOT EXISTS ".$tableName."(".implode(', ', $columns).") ENGINE = InnoDB DEFAULT CHARSET=utf8mb4";
+        }
+        return $tables;
+    }
+    public function getRows() {
+        $tables = array();
+        foreach ($this->data as $table) {
+            $structure = array();
+            $rows = array();
+            foreach ($table->structure as $column) {
+                $structure[] = $column->Field;
+            }
+            foreach ($table->rows as $row) {
+                $rowValues = array();
+                foreach ($row as $value) {
+                    $rowValues[] = "'$value'";
+                }
+                $rows[] = '('.implode(',', $rowValues).')';
+            }
+            if (count($rows) > 0) {
+                $tables[] = 'INSERT INTO '.$table->tableName.'('.implode(',', $structure).') VALUES '.implode(',', $rows);
+            }
         }
         return $tables;
     }
     public function start() {
-        $fileBackup = json_decode($this->readFile());
-        $tablesToCreate = $this->getTables($fileBackup);
-        return $tablesToCreate;
+        $tablesToCreate = $this->getTables();
+        $rowsToCreate = $this->getRows();
+        return [
+            "tables" => $tablesToCreate,
+            "rows" => $rowsToCreate
+        ];
     }
 }

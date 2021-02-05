@@ -1,6 +1,15 @@
 <?php
 require_once "autoload.php";
+use Modules\DataBase;
 use Modules\Backup\Import;
 $json = $_GET['json'];
 $import = new Import($json);
-echo implode("<br><br>", $import->start());
+$elements = $import->start();
+$db = new DataBase('localhost', 'root', '', 'tests');
+$connection = $db->connection;
+foreach ($elements['tables'] as $value) {
+    $connection->query($value);
+}
+foreach ($elements['rows'] as $value) {
+    $connection->query($value);
+}

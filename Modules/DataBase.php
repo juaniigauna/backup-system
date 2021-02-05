@@ -51,4 +51,7 @@ class DataBase {
         }
         return $collection;
     }
+    public function createTables($tables) {
+        $this->connection->query("$tables");
+    }
 }
